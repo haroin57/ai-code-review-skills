@@ -95,7 +95,33 @@ git diff origin/main...HEAD | \
 - `--reviewers security,coverage` — レビュアー絞り込み（最低この2つは回せ、というのが元テンプレの推奨）
 - `--no-coordinator` — Coordinator をスキップして各レビュアーの raw XML を出力
 - `--model` — モデル上書き（CLI 依存）
-- `--output-dir` — `<reviewer>.xml` と `summary.xml` をディレクトリに保存
+- `--output-dir` — `<reviewer>.xml`, `summary.xml`, `run.log` をディレクトリに保存。各レビュアー XML は完了した順に書き出される（並列性が可視化される）
+- `--log-file` — 進捗ログの出力先を明示指定（未指定なら `--output-dir/run.log`）
+
+## 進捗ログ
+
+`--output-dir` を渡すと、ログが行バッファリングで `run.log` に追記され、各レビュアーの XML も完了した順に書かれます。Claude Code 上から `BashOutput` で追跡したい場合は **必ずバックグラウンド起動 (`run_in_background: true`)** してください。
+
+ログ例:
+
+```
+2026-05-13T06:35:12Z   +0.0s  start backend=claude model=default reviewers=security,performance,sre,coverage diff_chars=1240 output_dir=/tmp/review_out log_file=/tmp/review_out/run.log pid=12345
+2026-05-13T06:35:12Z   +0.1s  [security] dispatched (1234 chars)
+2026-05-13T06:35:12Z   +0.1s  [performance] dispatched (1240 chars)
+2026-05-13T06:35:12Z   +0.1s  [sre] dispatched (1301 chars)
+2026-05-13T06:35:12Z   +0.1s  [coverage] dispatched (1231 chars)
+2026-05-13T06:35:38Z  +26.4s  [security] done in 26.3s (2104 chars)
+2026-05-13T06:35:38Z  +26.4s  [security] wrote /tmp/review_out/security.xml
+2026-05-13T06:35:41Z  +29.5s  [coverage] done in 29.4s (1655 chars)
+2026-05-13T06:35:53Z  +41.2s  [performance] done in 41.1s (1820 chars)
+2026-05-13T06:35:53Z  +41.6s  [sre] done in 41.5s (1903 chars)
+2026-05-13T06:35:53Z  +41.7s  all reviewers finished (4 of 4)
+2026-05-13T06:35:53Z  +41.7s  [coordinator] dispatched (8421 chars)
+2026-05-13T06:36:05Z  +53.7s  [coordinator] done in 12.0s (1881 chars)
+2026-05-13T06:36:05Z  +53.7s  done
+```
+
+別シェルから `tail -f /tmp/review_out/run.log` でリアルタイム追従もできます。
 
 ## 出力フォーマット
 
