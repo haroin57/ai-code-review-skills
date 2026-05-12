@@ -27,22 +27,30 @@ model family, or when API quota considerations favor Codex.
 
 ## How to run
 
-Same flow as the Claude skill; just change `--backend`:
+Same flow as the Claude skill; just change `--backend`. **Always pass
+`--output-dir` and run in the background** so per-reviewer XML and `run.log`
+appear as work progresses — then tail the log via `BashOutput` or `tail -f`
+to keep the user informed instead of staring at a blank terminal.
 
 ```bash
+OUT=/tmp/review_out_codex_$(date +%s)
 python3 "$SKILL_DIR/../../scripts/run_review.py" \
   --backend codex \
   --diff /tmp/review.diff \
-  --language go \
-  --framework "net/http" \
+  --language go --framework "net/http" \
   --environment production \
   --trust-boundary "untrusted HTTP" \
   --auth-method "session cookie" \
-  --output-dir /tmp/review_out_codex
+  --output-dir "$OUT"
+echo "log: $OUT/run.log"
+echo "summary: $OUT/summary.xml"
 ```
 
 The runner pipes the rendered prompt to `codex exec -` (stdin mode) so large
 diffs don't hit argv length limits.
+
+Log format is identical to the Claude skill — see that SKILL.md for the
+example output and progress-surfacing protocol.
 
 ## Differences vs the Claude skill
 

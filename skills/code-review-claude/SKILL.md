@@ -35,30 +35,56 @@ prefer a one-shot review instead of this skill.
 2. Resolve context variables from the project (`--language`, `--framework`,
    `--environment`, etc.). If you cannot infer a value with high confidence,
    leave it as `unknown` rather than guessing.
-3. Run the runner script. It's two directories up from this SKILL.md:
+3. Always invoke the runner with `--output-dir` pointing at a fresh temp dir
+   (e.g. `/tmp/review_out_$(date +%s)`). Per-reviewer XML files are written as
+   soon as each reviewer finishes, and a `run.log` is created automatically.
+4. **Run the script in the background so progress is observable.** Use the
+   Bash tool's `run_in_background: true`. While it runs, use `BashOutput` (or
+   `tail -f` on the log file in another shell) to surface progress to the
+   user. The log format is:
 
-```bash
-python3 "$SKILL_DIR/../../scripts/run_review.py" \
-  --backend claude \
-  --diff /tmp/review.diff \
-  --language python \
-  --framework fastapi \
-  --environment "production, k8s" \
-  --trust-boundary "external HTTP input" \
-  --auth-method "JWT (RS256)" \
-  --data-scale "10M rows / day" \
-  --is-hot-path yes \
-  --test-framework pytest \
-  --output-dir /tmp/review_out
-```
+   ```
+   2026-05-13T06:35:12Z   +0.0s  start backend=claude ... pid=12345
+   2026-05-13T06:35:12Z   +0.1s  [security] dispatched (1234 chars)
+   2026-05-13T06:35:12Z   +0.1s  [performance] dispatched (1240 chars)
+   ...
+   2026-05-13T06:35:38Z  +26.4s  [security] done in 26.3s (2104 chars)
+   2026-05-13T06:35:38Z  +26.4s  [security] wrote /tmp/review_out_*/security.xml
+   ...
+   2026-05-13T06:36:05Z  +53.7s  [coordinator] done in 12.0s (1881 chars)
+   2026-05-13T06:36:05Z  +53.7s  done
+   ```
 
-`$SKILL_DIR` is whatever directory contains this SKILL.md. When the skill is
-symlinked into `~/.claude/skills/`, the script lives at the symlink target;
-Python resolves the path via `Path(__file__).resolve()` so it still works.
+5. Example invocation:
 
-4. Read the Coordinator output (`/tmp/review_out/summary.xml`) and present it
-   to the user. If `verdict` is `REQUEST_CHANGES`, lead with the critical
-   issues. Always link to per-reviewer XML files for drill-down.
+   ```bash
+   OUT=/tmp/review_out_$(date +%s)
+   python3 "$SKILL_DIR/../../scripts/run_review.py" \
+     --backend claude \
+     --diff /tmp/review.diff \
+     --language python --framework fastapi \
+     --environment "production, k8s" \
+     --trust-boundary "external HTTP input" \
+     --auth-method "JWT (RS256)" \
+     --data-scale "10M rows / day" --is-hot-path yes \
+     --test-framework pytest \
+     --output-dir "$OUT"
+   echo "log: $OUT/run.log"
+   echo "summary: $OUT/summary.xml"
+   ```
+
+   `$SKILL_DIR` is whatever directory contains this SKILL.md. When the skill
+   is symlinked into `~/.claude/skills/`, the script lives at the symlink
+   target; Python resolves the path via `Path(__file__).resolve()` so it
+   still works.
+
+6. While running, surface meaningful events to the user (e.g. "security and
+   coverage finished, performance still pending, coordinator hasn't started
+   yet") — do not silently wait.
+
+7. When the background job exits, read `summary.xml` and present it. If
+   `verdict` is `REQUEST_CHANGES`, lead with the critical issues. Always
+   link to per-reviewer XML files for drill-down.
 
 ## Options worth knowing
 
