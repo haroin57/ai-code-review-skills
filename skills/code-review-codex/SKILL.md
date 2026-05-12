@@ -56,6 +56,7 @@ example output and progress-surfacing protocol.
 
 Identical to the Claude skill — see that SKILL.md for `--reviewers all`,
 `--force`, `--skip`, `--dry-run`, `--no-coordinator`. The reviewer registry
+(including conditional dispatch rules for `api-contract` and `dependencies`)
 is shared between backends.
 
 ## Differences vs the Claude skill

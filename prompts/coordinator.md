@@ -6,8 +6,10 @@
 - Performance Reviewer (`<performance_review>`)
 - SRE Reviewer (`<sre_review>`)
 - Coverage Reviewer (`<coverage_review>`)
+- API Contract Reviewer (`<api_contract_review>`) — diff にスキーマ/マイグレーション変更があるときのみ
+- Dependencies Reviewer (`<dependencies_review>`) — diff にマニフェスト/ロックファイル変更があるときのみ
 
-各レビュアーの出力が空 or 欠落していることもある。その場合は無視して残りで統合せよ。
+各レビュアーの出力が空 or 欠落していることもある（dispatch で skip された場合 / コスト節約モード）。その場合は無視して残りで統合せよ。**欠落をエラーとして報告するな。**
 
 ## Task
 1. 全レビュアーの `<issue>` を統合し、(file, line) が同一の指摘で内容が実質同じものは1件にマージする
@@ -16,8 +18,11 @@
 4. critical が1件でもあれば冒頭に「🚨 CRITICAL ISSUES FOUND」と明記する
 5. verdict を判定:
    - critical が1件以上 → REQUEST_CHANGES
+   - dependencies の `<overall>BLOCK</overall>` が出ていれば → REQUEST_CHANGES
+   - api-contract で `<breaking_change>true</breaking_change>` かつ `<migration_steps>` が空 → REQUEST_CHANGES
    - warning のみ → NEEDS_DISCUSSION
    - suggestion のみ or issue なし → APPROVE
+6. 詳細フィールド（`<cwe>`, `<failure_scenario>`, `<test_scenario>`, `<migration_steps>`, `<classification>` 等）は要約 `<issue>` には載せず、`<details_ref>` で per-reviewer XML への参照を残せ
 
 ## Output Format
 前置き・後置きの説明文は禁止。以下のXML構造のみを返せ。critical があれば XML の前に「🚨 CRITICAL ISSUES FOUND」の1行を入れる。
@@ -32,11 +37,12 @@
   <issues>
     <issue>
       <severity>critical | warning | suggestion</severity>
-      <reviewer>security | performance | sre | coverage</reviewer>
+      <reviewer>security | performance | sre | coverage | api-contract | dependencies</reviewer>
       <file>...</file>
       <line>...</line>
       <description>...</description>
       <remediation>...</remediation>
+      <details_ref>per-reviewer XML へのリンク（任意。`<output-dir>/<reviewer>.xml` 形式）</details_ref>
     </issue>
   </issues>
   <verdict>APPROVE | REQUEST_CHANGES | NEEDS_DISCUSSION</verdict>
