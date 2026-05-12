@@ -92,11 +92,32 @@ git diff origin/main...HEAD | \
 
 その他の運用オプション:
 
-- `--reviewers security,coverage` — レビュアー絞り込み（最低この2つは回せ、というのが元テンプレの推奨）
+- `--reviewers security,coverage` — レビュアー絞り込み
+- `--reviewers all` — 登録済みの全レビュアーを起動（default + opt-in + diff にヒットした conditional）
+- `--force <name>` — conditional レビュアーをファイル一致なしでも強制起動（カンマ区切り）
+- `--skip <name>` — 通常選ばれるレビュアーを除外
+- `--dry-run` — 解決後のレビュアー一覧を出力して即終了（API は呼ばない、dispatch 確認用）
 - `--no-coordinator` — Coordinator をスキップして各レビュアーの raw XML を出力
 - `--model` — モデル上書き（CLI 依存）
 - `--output-dir` — `<reviewer>.xml`, `summary.xml`, `run.log` をディレクトリに保存。各レビュアー XML は完了した順に書き出される（並列性が可視化される）
 - `--log-file` — 進捗ログの出力先を明示指定（未指定なら `--output-dir/run.log`）
+
+## レビュアー dispatch
+
+レビュアーは 3 種類に分類されます:
+
+| 種別 | 動作 | Phase 1 のメンバー |
+| --- | --- | --- |
+| **always** | デフォルトで毎回起動 | `security`, `performance`, `sre`, `coverage` |
+| **conditional** | diff が対象ファイル glob にマッチしたときのみ起動。`--force` で強制 ON | （Phase 2 で追加予定）|
+| **opt-in** | `--reviewers` 明示指定 or `--reviewers all` のときのみ起動 | （Phase 3 で追加予定）|
+
+選択ロジック:
+- `--reviewers` 省略 → always + マッチした conditional
+- `--reviewers <list>` → 指定したものだけ（conditional は dispatch 条件を満たすか `--force` が必要）
+- `--reviewers all` → always + opt-in + マッチした conditional
+
+`--dry-run` で実 API 呼び出し前に選択結果を確認できます。
 
 ## 進捗ログ
 

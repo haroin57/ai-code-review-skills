@@ -88,10 +88,32 @@ prefer a one-shot review instead of this skill.
 
 ## Options worth knowing
 
-- `--reviewers security,coverage` — minimum recommended subset when cost is a
-  concern (the template's "最低でもSecurity + Coverageは回すこと" rule).
+- `--reviewers security,coverage` — explicit subset (minimum recommended pair
+  when cost matters).
+- `--reviewers all` — run every registered reviewer (defaults + opt-in + any
+  conditional that matches the diff).
+- `--force <name>` — comma-separated; run a conditional reviewer even if no
+  matching files are in the diff.
+- `--skip <name>` — comma-separated; drop a reviewer that would otherwise run.
+- `--dry-run` — print the resolved reviewer list and exit (no API calls).
+  Useful for verifying dispatch before paying for a real run.
 - `--no-coordinator` — skip the merge step; prints raw per-reviewer XML.
 - `--model claude-opus-4-7` — override model (default uses the CLI's default).
+
+## Reviewer registry (Phase 1)
+
+| Reviewer | When it runs |
+| --- | --- |
+| `security` | always (default) |
+| `performance` | always (default) |
+| `sre` | always (default) |
+| `coverage` | always (default) |
+
+Future phases will add conditional reviewers (auto-trigger only when the diff
+touches matching files, e.g. manifests for `dependencies`, schemas for
+`api-contract`) and opt-in reviewers (`architecture`, `maintainability`) that
+only run when listed in `--reviewers`. Dispatch logic is already wired so the
+flags above will keep working when those reviewers register.
 
 ## Output
 
