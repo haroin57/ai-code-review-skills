@@ -38,6 +38,7 @@ PROMPTS = ROOT / "prompts"
 # additions in later phases are just registry edits.
 ALL_REVIEWERS: list[str] = [
     "security", "performance", "sre", "coverage",
+    "api-contract", "dependencies",
 ]
 DEFAULT_REVIEWERS: list[str] = [
     "security", "performance", "sre", "coverage",
@@ -45,7 +46,50 @@ DEFAULT_REVIEWERS: list[str] = [
 # reviewer name -> list of glob patterns (matched against changed file paths).
 # Conditional reviewers are auto-included when at least one changed file
 # matches. They can be forced on via --force, or off via --skip.
-CONDITIONAL_REVIEWERS: dict[str, list[str]] = {}
+CONDITIONAL_REVIEWERS: dict[str, list[str]] = {
+    "api-contract": [
+        "**/*.proto",
+        "**/openapi*.{yaml,yml,json}",
+        "**/swagger*.{yaml,yml,json}",
+        "**/*.graphql",
+        "**/*.graphqls",
+        "**/migrations/**",
+        "**/schema.sql",
+        "**/schema.prisma",
+        "**/sdk/**/*.ts",
+        "**/sdk/**/*.py",
+        "**/sdk/**/*.go",
+        "**/sdk/**/*.rs",
+        "**/sdk/**/*.kt",
+        "**/api/v*/**",
+    ],
+    "dependencies": [
+        "package.json",
+        "package-lock.json",
+        "pnpm-lock.yaml",
+        "yarn.lock",
+        "pyproject.toml",
+        "poetry.lock",
+        "requirements*.txt",
+        "Pipfile",
+        "Pipfile.lock",
+        "go.mod",
+        "go.sum",
+        "Cargo.toml",
+        "Cargo.lock",
+        "Gemfile",
+        "Gemfile.lock",
+        "composer.json",
+        "composer.lock",
+        "pom.xml",
+        "build.gradle",
+        "build.gradle.kts",
+        "**/package.json",
+        "**/pyproject.toml",
+        "**/Cargo.toml",
+        "**/go.mod",
+    ],
+}
 # Opt-in reviewers never run by default. They run only when listed in
 # --reviewers (or via --reviewers all).
 OPT_IN_REVIEWERS: list[str] = []

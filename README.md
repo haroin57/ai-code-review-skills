@@ -106,18 +106,25 @@ git diff origin/main...HEAD | \
 
 レビュアーは 3 種類に分類されます:
 
-| 種別 | 動作 | Phase 1 のメンバー |
+| 種別 | 動作 | メンバー |
 | --- | --- | --- |
 | **always** | デフォルトで毎回起動 | `security`, `performance`, `sre`, `coverage` |
-| **conditional** | diff が対象ファイル glob にマッチしたときのみ起動。`--force` で強制 ON | （Phase 2 で追加予定）|
+| **conditional** | diff が対象ファイル glob にマッチしたときのみ起動。`--force` で強制 ON | `api-contract`, `dependencies` |
 | **opt-in** | `--reviewers` 明示指定 or `--reviewers all` のときのみ起動 | （Phase 3 で追加予定）|
+
+### Conditional トリガー
+
+| Reviewer | 起動条件（diff にこれらいずれかが含まれる） |
+| --- | --- |
+| `api-contract` | `**/*.proto`, `**/openapi*.{yaml,yml,json}`, `**/*.graphql`, `**/migrations/**`, `**/schema.{sql,prisma}`, `**/sdk/**`, `**/api/v*/**` |
+| `dependencies` | `package.json`, `*-lock.{json,yaml}`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `Gemfile*`, `composer.json`, `pom.xml`, `build.gradle*`（ルート + monorepo の `**/` 配下） |
 
 選択ロジック:
 - `--reviewers` 省略 → always + マッチした conditional
 - `--reviewers <list>` → 指定したものだけ（conditional は dispatch 条件を満たすか `--force` が必要）
 - `--reviewers all` → always + opt-in + マッチした conditional
 
-`--dry-run` で実 API 呼び出し前に選択結果を確認できます。
+コスト: デフォルト 5 calls (4 reviewer + Coordinator)。conditional ヒット 1 件で 6、両方ヒットで 7。`--dry-run` で実 API 呼び出し前に確認できます。
 
 ## 進捗ログ
 

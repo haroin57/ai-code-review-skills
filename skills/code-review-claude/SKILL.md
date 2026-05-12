@@ -100,20 +100,21 @@ prefer a one-shot review instead of this skill.
 - `--no-coordinator` — skip the merge step; prints raw per-reviewer XML.
 - `--model claude-opus-4-7` — override model (default uses the CLI's default).
 
-## Reviewer registry (Phase 1)
+## Reviewer registry
 
-| Reviewer | When it runs |
-| --- | --- |
-| `security` | always (default) |
-| `performance` | always (default) |
-| `sre` | always (default) |
-| `coverage` | always (default) |
+| Reviewer | When it runs | Trigger |
+| --- | --- | --- |
+| `security` | always | — |
+| `performance` | always | — |
+| `sre` | always | — |
+| `coverage` | always | — |
+| `api-contract` | conditional | diff touches `**/*.proto`, `**/openapi*.{yaml,yml,json}`, `**/*.graphql`, `**/migrations/**`, `**/schema.{sql,prisma}`, `**/sdk/**`, `**/api/v*/**` |
+| `dependencies` | conditional | diff touches `package.json`, `*-lock.*`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `Gemfile`, `composer.json`, `pom.xml`, `build.gradle*` (root or nested) |
 
-Future phases will add conditional reviewers (auto-trigger only when the diff
-touches matching files, e.g. manifests for `dependencies`, schemas for
-`api-contract`) and opt-in reviewers (`architecture`, `maintainability`) that
-only run when listed in `--reviewers`. Dispatch logic is already wired so the
-flags above will keep working when those reviewers register.
+Cost: default invocation = 5 calls (4 always + Coordinator). With one
+conditional firing = 6 calls. Both firing = 7. Use `--dry-run` to preview.
+
+Opt-in reviewers (Phase 3) will join later via the same `--reviewers` flag.
 
 ## Output
 
