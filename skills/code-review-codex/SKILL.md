@@ -52,6 +52,12 @@ diffs don't hit argv length limits.
 Log format is identical to the Claude skill — see that SKILL.md for the
 example output and progress-surfacing protocol.
 
+## Options worth knowing
+
+Identical to the Claude skill — see that SKILL.md for `--reviewers all`,
+`--force`, `--skip`, `--dry-run`, `--no-coordinator`. The reviewer registry
+is shared between backends.
+
 ## Differences vs the Claude skill
 
 | Aspect | Claude | Codex |
@@ -60,6 +66,7 @@ example output and progress-surfacing protocol.
 | Default model | per `~/.claude/settings.json` | per `~/.codex/config.toml` |
 | Auth | Anthropic key / Claude Code login | OpenAI key / `codex login` |
 | Output format | identical (XML, per prompt instructions) | identical |
+| Reviewer registry | shared | shared |
 
 ## Cross-checking with the Claude skill
 
