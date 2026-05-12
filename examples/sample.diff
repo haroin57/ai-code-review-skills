@@ -1,0 +1,33 @@
+diff --git a/app/auth.py b/app/auth.py
+index e69de29..b6fc4c6 100644
+--- a/app/auth.py
++++ b/app/auth.py
+@@ -0,0 +1,28 @@
++import hashlib
++import sqlite3
++
++DB = sqlite3.connect("app.db")
++SECRET = "hardcoded-jwt-key-do-not-ship"
++
++def login(username: str, password: str) -> bool:
++    # ⚠ intentional anti-patterns for demoing reviewers
++    cur = DB.cursor()
++    cur.execute(f"SELECT password_hash FROM users WHERE name = '{username}'")
++    row = cur.fetchone()
++    if row is None:
++        return False
++    h = hashlib.md5(password.encode()).hexdigest()
++    return h == row[0]
++
++
++def list_orders(user_id: int):
++    cur = DB.cursor()
++    cur.execute("SELECT id FROM orders WHERE user_id = ?", (user_id,))
++    order_ids = [r[0] for r in cur.fetchall()]
++    items = []
++    for oid in order_ids:
++        cur.execute("SELECT name FROM items WHERE order_id = ?", (oid,))
++        items.extend(r[0] for r in cur.fetchall())
++    return items
++
++# no tests, no logging, no error handling
