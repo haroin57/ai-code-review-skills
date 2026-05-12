@@ -39,6 +39,7 @@ PROMPTS = ROOT / "prompts"
 ALL_REVIEWERS: list[str] = [
     "security", "performance", "sre", "coverage",
     "api-contract", "dependencies",
+    "architecture", "maintainability",
 ]
 DEFAULT_REVIEWERS: list[str] = [
     "security", "performance", "sre", "coverage",
@@ -91,8 +92,10 @@ CONDITIONAL_REVIEWERS: dict[str, list[str]] = {
     ],
 }
 # Opt-in reviewers never run by default. They run only when listed in
-# --reviewers (or via --reviewers all).
-OPT_IN_REVIEWERS: list[str] = []
+# --reviewers (or via --reviewers all). These reviewers have higher false
+# positive risk (architecture: opinion-driven; maintainability: bikeshed-prone)
+# so they are gated behind explicit user request.
+OPT_IN_REVIEWERS: list[str] = ["architecture", "maintainability"]
 
 
 def render(template: str, variables: dict[str, str]) -> str:
