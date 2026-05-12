@@ -110,7 +110,7 @@ git diff origin/main...HEAD | \
 | --- | --- | --- |
 | **always** | デフォルトで毎回起動 | `security`, `performance`, `sre`, `coverage` |
 | **conditional** | diff が対象ファイル glob にマッチしたときのみ起動。`--force` で強制 ON | `api-contract`, `dependencies` |
-| **opt-in** | `--reviewers` 明示指定 or `--reviewers all` のときのみ起動 | （Phase 3 で追加予定）|
+| **opt-in** | `--reviewers` 明示指定 or `--reviewers all` のときのみ起動 | `architecture`, `maintainability` |
 
 ### Conditional トリガー
 
@@ -124,7 +124,13 @@ git diff origin/main...HEAD | \
 - `--reviewers <list>` → 指定したものだけ（conditional は dispatch 条件を満たすか `--force` が必要）
 - `--reviewers all` → always + opt-in + マッチした conditional
 
-コスト: デフォルト 5 calls (4 reviewer + Coordinator)。conditional ヒット 1 件で 6、両方ヒットで 7。`--dry-run` で実 API 呼び出し前に確認できます。
+コスト: デフォルト 5 calls (4 reviewer + Coordinator)。conditional ヒット 1 件で 6、両方ヒットで 7。`--reviewers all` で最大 9 calls。`--dry-run` で実 API 呼び出し前に確認できます。
+
+### opt-in レビュアー使用上の注意
+
+- `architecture` は意見が分かれやすい領域、`maintainability` は bikeshed を生みやすい領域
+- 両 prompt とも先頭に「refuse anti-patterns」を明示し誤検知を抑える設計
+- ただし AI 出力の最終判断は人間が必要。**毎回回すべきではない**。アーキテクチャ判断 / 可読性集中レビューが必要なときに `--reviewers all` or 明示指定で起動
 
 ## 進捗ログ
 

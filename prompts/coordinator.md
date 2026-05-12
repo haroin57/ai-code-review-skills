@@ -8,6 +8,8 @@
 - Coverage Reviewer (`<coverage_review>`)
 - API Contract Reviewer (`<api_contract_review>`) — diff にスキーマ/マイグレーション変更があるときのみ
 - Dependencies Reviewer (`<dependencies_review>`) — diff にマニフェスト/ロックファイル変更があるときのみ
+- Architecture Reviewer (`<architecture_review>`) — opt-in（`--reviewers` 明示指定時のみ）
+- Maintainability Reviewer (`<maintainability_review>`) — opt-in（`--reviewers` 明示指定時のみ）
 
 各レビュアーの出力が空 or 欠落していることもある（dispatch で skip された場合 / コスト節約モード）。その場合は無視して残りで統合せよ。**欠落をエラーとして報告するな。**
 
@@ -37,7 +39,7 @@
   <issues>
     <issue>
       <severity>critical | warning | suggestion</severity>
-      <reviewer>security | performance | sre | coverage | api-contract | dependencies</reviewer>
+      <reviewer>security | performance | sre | coverage | api-contract | dependencies | architecture | maintainability</reviewer>
       <file>...</file>
       <line>...</line>
       <description>...</description>

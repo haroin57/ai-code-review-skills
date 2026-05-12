@@ -110,11 +110,17 @@ prefer a one-shot review instead of this skill.
 | `coverage` | always | — |
 | `api-contract` | conditional | diff touches `**/*.proto`, `**/openapi*.{yaml,yml,json}`, `**/*.graphql`, `**/migrations/**`, `**/schema.{sql,prisma}`, `**/sdk/**`, `**/api/v*/**` |
 | `dependencies` | conditional | diff touches `package.json`, `*-lock.*`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `Gemfile`, `composer.json`, `pom.xml`, `build.gradle*` (root or nested) |
+| `architecture` | **opt-in** | `--reviewers architecture,...` or `--reviewers all` |
+| `maintainability` | **opt-in** | `--reviewers maintainability,...` or `--reviewers all` |
 
-Cost: default invocation = 5 calls (4 always + Coordinator). With one
-conditional firing = 6 calls. Both firing = 7. Use `--dry-run` to preview.
+Cost: default invocation = 5 calls. Conditional firing adds 1 each (max 7).
+`--reviewers all` runs every reviewer that's applicable to the diff (max 9).
 
-Opt-in reviewers (Phase 3) will join later via the same `--reviewers` flag.
+**Warning on opt-in reviewers**: `architecture` is opinion-driven and
+`maintainability` is bikeshed-prone. Both have hard "anti-patterns to refuse"
+sections built into their prompts, but human final review is still essential.
+Don't enable them on every diff — use them when you specifically want an
+architectural or readability lens.
 
 ## Output
 
