@@ -19,6 +19,32 @@ Coordinator deduplicates and ranks issues by severity.
 If the request is a single-aspect quick check (e.g. "just look for typos"),
 prefer a one-shot review instead of this skill.
 
+## Choosing the reviewer set
+
+The default invocation runs 4 reviewers (`security,performance,sre,coverage`).
+Two reviewers auto-trigger on file patterns (`api-contract`, `dependencies`).
+Two reviewers are opt-in only (`architecture`, `maintainability`). Pick the
+flag based on the user's wording:
+
+| User signal | Flag to use | Why |
+| --- | --- | --- |
+| 「徹底」「精緻」「全観点」「thorough」「comprehensive」「everything」「8観点で」 | `--reviewers all` | runs default 4 + 2 opt-in + matched conditionals. Up to 9 calls |
+| 「API契約」「breaking change」「schema migration」「後方互換」 | `--force api-contract` (and let other conditionals dispatch normally) | guarantees api-contract runs even if dispatch heuristic misses the file |
+| 「依存」「dependency」「lockfile」「supply chain」「SBOM」 | `--force dependencies` | guarantees dependencies runs |
+| 「設計」「architecture」「module 構造」「結合度」「DDD」 | `--reviewers security,performance,sre,coverage,architecture` | adds the opt-in architecture reviewer |
+| 「読みやすさ」「naming」「複雑度」「refactor」「maintainability」 | `--reviewers security,performance,sre,coverage,maintainability` | adds the opt-in maintainability reviewer |
+| 「軽く」「サクッと」「quick」「fast」 | `--reviewers security,coverage` | minimum recommended pair |
+| 何も指定なし | default (no `--reviewers`) | 4 always + matched conditionals |
+
+Before launching the run, announce the chosen set in one line to the user
+(e.g., "全観点で回します（`--reviewers all`、最大 9 calls）" or
+"デフォルトの 4 reviewer で回します"). This is so the user can interrupt if
+the choice was wrong before paying for the API calls.
+
+When in doubt, prefer the wider set — the prompts have explicit
+"refuse anti-patterns" sections to suppress bikeshed, so the cost of an extra
+reviewer is mostly compute, not noise.
+
 ## Prerequisites
 
 - `claude` CLI on PATH (already present if you are reading this from Claude
