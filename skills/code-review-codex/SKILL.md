@@ -16,6 +16,15 @@ model family, or when API quota considerations favor Codex.
   one, then diff the verdicts)
 - Claude API is rate-limited / down
 
+## Choosing the reviewer set
+
+Use the same heuristics as `code-review-claude`. See that SKILL.md's
+"Choosing the reviewer set" table for mapping user signals (徹底 → `--reviewers all`,
+API契約 → `--force api-contract`, 依存 → `--force dependencies`, 設計 →
+opt-in architecture, 読みやすさ → opt-in maintainability, 軽く → minimum
+subset). The reviewer registry and flag semantics are identical between
+backends. Always announce the chosen set before starting the run.
+
 ## Prerequisites
 
 - `codex` CLI on PATH. Install via:
